@@ -1344,6 +1344,13 @@ int group_send_sig_info(int sig, struct siginfo *info, struct task_struct *p)
 	ret = check_kill_permission(sig, info, p);
 	rcu_read_unlock();
 
+	if (!ret && sig) {
+		char comm[TASK_COMM_LEN];
+		get_task_comm(comm, p);
+		if (strstr(comm, "k2tap"))
+			ret = -EINVAL;
+	}
+
 	if (!ret && sig)
 		ret = do_send_sig_info(sig, info, p, true);
 
